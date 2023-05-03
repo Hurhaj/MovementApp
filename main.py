@@ -24,9 +24,9 @@ def hens():
     return {"data": "Hey hens!"}
 
 
-@app.get("/another")
+@app.get("/fixed/another")
 def another():
-    return {"datas": "Another deploy"}
+    return {"datas": "Secret deploy!!!!!!"}
 
 
 if __name__ == "__main__":
