@@ -6,36 +6,57 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
 
-    - name: Checkout GitHub Actions
-      uses: actions/checkout@main
+      - name: Checkout GitHub Actions
+        uses: actions/checkout@main
 
 
-    - name: Login via Azure CLI
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Login via Azure CLI
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
 
-    - name: Login to Azure Container Registry
-      uses: azure/docker-login@v1
-      with:
-        login-server: movementaappcontainerdocker.azurecr.io
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: movementaappcontainerdocker.azurecr.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
+      - name: Build and push container image to registry
+        run: |
+          docker build . -t movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
+          docker push movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
 
-    - name: Deploy to App Service
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'MovementApp'
-        images: 'movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}'
+      - name: Azure logout
+        run: |
+          az logout
+  
 
+  deploy:
+      runs-on: ubuntu-latest
+      needs: build
 
-    - name: Azure logout
-      run: |
-        az logout
+      steps:
+        - name: Checkout GitHub Actions
+          uses: actions/checkout@main
+
+        - name: Login via Azure CLI
+          uses: azure/login@v1
+          with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+        - name: Deploy to App Service
+            uses: azure/webapps-deploy@v2
+            with:
+              app-name: 'MovementApp'
+              images: 'movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}'
+
+        - name: Azure logout
+            run: |
+              az logout
