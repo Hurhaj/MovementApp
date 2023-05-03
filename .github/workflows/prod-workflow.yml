@@ -28,20 +28,6 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
 
-    - name: Check Resource Group
-      uses: azure/cli@v1
-      with:
-        inlineScript: |
-          acr_rg=$(az acr show --name movementaAppContainerDocker --query 'resourceGroup' -o tsv)
-          webapi_rg=$(az webapp show --name MovementApp --resource-group final-common-group --query 'resourceGroup' -o tsv)
-          if [[ "$acr_rg" == "$webapi_rg" ]]; then echo "Both resources are in the same resource group."; else echo "Resources are in different resource groups."; exit 1; fi
-
-    - name: Build and push container image to registry
-      run: |
-        docker build . -t movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
-        docker push movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
-
-
     - name: Deploy to App Service
       uses: azure/webapps-deploy@v2
       with:
