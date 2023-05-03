@@ -31,15 +31,15 @@ jobs:
 
     - name: Build and push container image to registry
       run: |
-        docker build . -t movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
-        docker push movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
+        docker build . -t movementaappcontainerdocker.azurecr.io/movementaAppContainerDocker:${{ github.sha }}
+        docker push movementaappcontainerdocker.azurecr.io/movementaAppContainerDocker:${{ github.sha }}
         
 
     - name: Deploy to App Service
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'MovementApp'
-        images: 'movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}'
+        images: 'movementaappcontainerdocker.azurecr.io/movementaAppContainerDocker:${{ github.sha }}'
 
 
     - name: Azure logout
