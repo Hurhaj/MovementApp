@@ -1,4 +1,5 @@
 import uvicorn
+import srtm
 from fastapi import FastAPI
 import os
 
@@ -27,6 +28,14 @@ def hens():
 @app.get("/fixed")
 def another():
     return {"datas": "Secret deploy!!!!!!!!"}
+
+@app.post("/elevation")
+async def return_elevation(locations : List[location]):
+    elevation_data = srtm.get_data()
+    elevations = []
+    for lo in locations:
+        elevations.append(elevation_data.get_elevation(lo.latitude,lo.longitude))
+    return elevations
 
 
 if __name__ == "__main__":
