@@ -19,7 +19,7 @@ def hello():
     return {"data": "Hello hens!"}
 
 @app.get("/hens")
-def hello():
+def hens():
     return {"data": "Hey hens!"}
 
 if __name__ == "__main__":
