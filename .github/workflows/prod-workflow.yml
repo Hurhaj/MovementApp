@@ -39,7 +39,7 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'MovementApp'
-        images: 'movementaappcontainerdocker.azurecr.io/movementaAppContainerDocker:${{ github.sha }}'
+        images: 'movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}'
 
 
     - name: Azure logout
