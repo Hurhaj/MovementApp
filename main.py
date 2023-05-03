@@ -24,7 +24,7 @@ def hens():
     return {"data": "Hey hens!"}
 
 
-@app.get("/fixed/another")
+@app.get("/fixed")
 def another():
     return {"datas": "Secret deploy!!!!!!!!"}
 
