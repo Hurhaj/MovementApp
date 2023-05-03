@@ -2,9 +2,13 @@ import uvicorn
 import srtm
 from fastapi import FastAPI
 from pymongo import MongoClient
+from pydantic import BaseModel
 import os
 from typing import List
 
+class location(BaseModel):
+    latitude: float
+    longitude: float
 # load environment variables
 port = os.environ["PORT"]
 #connection_string = "mongodb+srv://<username>:<password>@<cluster-name>.mongodb.net/<database-name>?retryWrites=true&w=majority"

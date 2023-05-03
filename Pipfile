@@ -8,6 +8,8 @@ fastapi = "*"
 uvicorn = "*"
 pymongo = "*"
 "srtm.py" = "*"
+"typing-extensions" = "*"
+pydantic = "*"
 [dev-packages]
 
 [requires]
