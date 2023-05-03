@@ -11,7 +11,7 @@ WORKDIR /app
 
 # install the packages from the Pipfile in the container
 RUN pip install pipenv
-RUN pipenv install --system --deploy --ignore-pipfile
+RUN pipenv update --system --deploy --ignore-pipfile
 
 # expose the port that uvicorn will run the app on
 ENV PORT=8000
