@@ -34,6 +34,9 @@ jobs:
         docker build . -t movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
         docker push movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
         
+    - name: Check if app service exists
+      run: |
+        az webapp show --name "MovementApp" --resource-group "movementapp_group" --query "name" -o tsv || echo "App service does not exist"
 
     - name: Deploy to App Service
       uses: azure/webapps-deploy@v2
