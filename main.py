@@ -18,6 +18,9 @@ def index():
 def hello():
     return {"data": "Hello hens!"}
 
+@app.get("/hens")
+def hello():
+    return {"data": "Hey hens!"}
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
