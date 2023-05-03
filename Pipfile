@@ -6,9 +6,9 @@ name = "pypi"
 [packages]
 fastapi = "*"
 uvicorn = "*"
-SRTM.py = "*"
 pymongo = "*"
+"srtm.py" = "*"
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.8"
