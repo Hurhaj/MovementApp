@@ -38,7 +38,7 @@ jobs:
     - name: Deploy to App Service
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'movementapp'
+        app-name: 'MovementApp'
         images: 'movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}'
 
 
