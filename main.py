@@ -3,6 +3,7 @@ import srtm
 from fastapi import FastAPI
 from pymongo import MongoClient
 import os
+from typing import List
 
 # load environment variables
 port = os.environ["PORT"]
