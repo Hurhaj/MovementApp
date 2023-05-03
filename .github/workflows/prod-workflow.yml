@@ -29,13 +29,6 @@ jobs:
         password: ${{ secrets.REGISTRY_PASSWORD }}
 
 
-    - name: Deploy to App Service
-      uses: azure/webapps-deploy@v2
-      with:
-        app-name: 'MovementApp'
-        images: 'movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}'
-
-
     - name: Build and push container image to registry
       run: |
         docker build . -t movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
