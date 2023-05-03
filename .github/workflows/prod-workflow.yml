@@ -34,9 +34,20 @@ jobs:
         docker build . -t movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
         docker push movementaappcontainerdocker.azurecr.io/fastapi-cd:${{ github.sha }}
         
-    - name: Check if app service exists
+    - name: Check if App Service and ACR exist in same resource group
       run: |
-        az webapp show --name "MovementApp" --resource-group "movementapp_group" --query "name" -o tsv || echo "App service does not exist"
+        appServiceName="MovementApp"
+        acrName="movementaappcontainerdocker"
+
+        # Get resource group of App Service
+        resourceGroup=$(az webapp list --query "[?name=='$appServiceName'].resourceGroup" -o tsv)
+
+        # Check if ACR exists in same resource group
+        if az acr show --name $acrName --resource-group $resourceGroup > /dev/null; then
+          echo "ACR exists in the same resource group as the App Service."
+        else
+          echo "ACR does not exist in the same resource group as the App Service."
+          exit 1
 
     - name: Deploy to App Service
       uses: azure/webapps-deploy@v2
