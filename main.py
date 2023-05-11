@@ -64,8 +64,13 @@ def index():
 
 @app.post("/mongo")
 async def put():
-    await mongotest()
-    return "done"
+    doc = {"user": "test"}
+    try:
+        news = await db["users"].insert_one(doc)
+        return "done"
+    except Exception as e:
+        return e
+
 @app.post("/erase")
 async def erase(deleteactivity : Delete):
     return authentificate(deleteactivity.token)
@@ -75,9 +80,6 @@ def return_elevation(locations : List[Location]):
     for lo in locations:
         elevations.append(elevation_data.get_elevation(lo.latitude,lo.longitude))
     return elevations
-async def mongotest():
-    doc = {"user":"test"}
-    new_user = await db["users"].insert_one(doc)
 def authentificate(token:str):
     kid = jwt.get_unverified_header(token).get("kid")
     public_key = public_keys.get(kid)
