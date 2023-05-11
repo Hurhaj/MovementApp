@@ -51,7 +51,7 @@ class Newactitivityreceive(BaseModel):
 port = os.environ["PORT"]
 connection_string = "mongodb+srv://user:user@cluster0.hbniblw.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(connection_string)
-db = client.userdata
+db = client["userdata"]
 public_keys_url = "https://www.googleapis.com/oauth2/v1/certs"
 public_keys = requests.get(public_keys_url).json()
 # initialize FastAPI
