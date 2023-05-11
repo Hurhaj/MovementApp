@@ -8,6 +8,8 @@ import jwt
 import requests
 from typing import List
 from datetime import datetime, timezone
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 class Location(BaseModel):
     latitude: float
@@ -52,8 +54,7 @@ port = os.environ["PORT"]
 connection_string = "mongodb+srv://user:user@cluster0.hbniblw.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(connection_string)
 db = client["userdata"]
-public_keys_url = "https://www.googleapis.com/oauth2/v1/certs"
-public_keys = requests.get(public_keys_url).json()
+
 # initialize FastAPI
 app = FastAPI()
 
@@ -63,13 +64,13 @@ def index():
     return {"data": "Application ran successfully - FastAPI V5! checkout apis: /hello /hens /another"}
 
 @app.post("/mongo")
-async def put():
-    doc = {"user": "test"}
+async def put(user:str):
+    doc = {"user": user}
     try:
-        news = await db["users"].insert_one(doc)
+        news = db["users"].insert_one(doc)
         return "done"
     except Exception as e:
-        return e
+        return e+"error"
 
 @app.post("/erase")
 async def erase(deleteactivity : Delete):
@@ -81,20 +82,12 @@ def return_elevation(locations : List[Location]):
         elevations.append(elevation_data.get_elevation(lo.latitude,lo.longitude))
     return elevations
 def authentificate(token:str):
-    kid = jwt.get_unverified_header(token).get("kid")
-    public_key = public_keys.get(kid)
     try:
-        decoded_token = jwt.decode(
-            token,
-            public_key,
-            algorithms=["RS256"],
-            audience="168397874560-5uso2lk8p5pa43h3sb3eg9futfisese0.apps.googleusercontent.com"
-            # replace with your client ID
-        )
-        expiration_time = datetime.fromtimestamp(decoded_token['exp'], timezone.utc)
+        idinfo = id_token.verify_oauth2_token(token, requests.Request(), "168397874560-5uso2lk8p5pa43h3sb3eg9futfisese0.apps.googleusercontent.com")
+        expiration_time = datetime.fromtimestamp(idinfo['exp'], timezone.utc)
         if datetime.now(timezone.utc) >= expiration_time:
             return Authenticated(email="token expired", error=True)
-        return Authenticated(email=decoded_token.get("email"), error=False)
+        return Authenticated(email=idinfo["email"], error=False)
     except jwt.exceptions.InvalidSignatureError:
         return Authenticated(email="Invalid_token_error", error=True)
     except jwt.exceptions.DecodeError:

@@ -12,6 +12,7 @@ pymongo = "*"
 pydantic = "*"
 jwt = "*"
 datetime = "*"
+google-auth = "*"
 [dev-packages]
 
 [requires]
