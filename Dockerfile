@@ -8,7 +8,7 @@ COPY ./Pipfile.lock /app/Pipfile.lock
 
 # set the working directory in the container to be /app
 WORKDIR /app
-
+RUN pip --version
 # install the packages from the Pipfile in the container
 RUN pip install pipenv
 RUN pipenv install --system --deploy --ignore-pipfile

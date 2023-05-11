@@ -10,7 +10,7 @@ pymongo = "*"
 "srtm.py" = "*"
 "typing-extensions" = "*"
 pydantic = "*"
-jwt= "*"
+jwt = "*"
 datetime = "*"
 [dev-packages]
 
