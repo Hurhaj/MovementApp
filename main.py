@@ -71,7 +71,7 @@ app = FastAPI()
 
 @app.get("/")
 def index():
-    return {"data": "Application ran successfully -version 0.0.1"}
+    return {"data": "Application ran successfully -version 0.0.2"}
 
 
 @app.post("/mongo")
@@ -87,9 +87,9 @@ async def put(user: str):
 @app.post("/erase")
 async def erase(deleteactivity: Delete):
     # send request to authentication microservice,where params is jwt token...in this case, deleteactivity
-    authenticated = requests.post(authentication_api, params=deleteactivity)
+    authenticated = requests.post(authentication_api, params=deleteactivity.token)
     if authenticated.status_code == 200:
-        return {"authentication": "SUCCES"}
+        return {"authentication": "SUCCESS"}
 
 
 def return_elevation(locations: List[Location]):
