@@ -4,7 +4,6 @@ import requests as req
 import srtm
 import uvicorn
 from fastapi import FastAPI
-from google.auth.transport import requests
 from pydantic import BaseModel
 from pymongo import MongoClient
 
@@ -68,7 +67,7 @@ app = FastAPI()
 
 @app.get("/")
 def index():
-    return {"data": "Application ran successfully -version 0.0.3"}
+    return {"data": "Application ran successfully -version 0.0.4"}
 
 
 @app.post("/mongo")
@@ -83,10 +82,14 @@ async def put(user: str):
 
 @app.post("/erase")
 async def erase(deleteactivity: Delete):
-    # send request to authentication microservice,where params is jwt token...in this case, deleteactivity
+    # send request to authentication microservice,where params is jwt token...in this case, deleteactivity.token
+
     authenticated = req.post(authentication_api, params=deleteactivity.token)
+    # dummy status code checks
     if authenticated.status_code == 200:
-        return {"authentication": "SUCCESS"}
+        return authenticated.json()
+    else:
+        return authenticated.json()
 
 
 def return_elevation(locations: List[Location]):
