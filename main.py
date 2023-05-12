@@ -1,15 +1,12 @@
-import uvicorn
-import srtm
-from fastapi import FastAPI
-from pymongo import MongoClient
-from pydantic import BaseModel
-import os
-import jwt
-import requests
 from typing import List
-from datetime import datetime, timezone
-from google.oauth2 import id_token
+
+import requests as req
+import srtm
+import uvicorn
+from fastapi import FastAPI
 from google.auth.transport import requests
+from pydantic import BaseModel
+from pymongo import MongoClient
 
 
 class Location(BaseModel):
@@ -59,7 +56,7 @@ class NewActitivityReceive(BaseModel):
 
 
 # load environment variables
-port = os.environ["PORT"]
+# port = os.environ["PORT"]
 authentication_api = "https://authenticationmicroservice.azurewebsites.net/authenticate"
 connection_string = "mongodb+srv://user:user@cluster0.hbniblw.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(connection_string)
@@ -87,7 +84,7 @@ async def put(user: str):
 @app.post("/erase")
 async def erase(deleteactivity: Delete):
     # send request to authentication microservice,where params is jwt token...in this case, deleteactivity
-    authenticated = requests.post(authentication_api, params=deleteactivity.token)
+    authenticated = req.post(authentication_api, params=deleteactivity.token)
     if authenticated.status_code == 200:
         return {"authentication": "SUCCESS"}
 
