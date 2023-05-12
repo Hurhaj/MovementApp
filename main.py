@@ -60,6 +60,7 @@ class NewActitivityReceive(BaseModel):
 
 # load environment variables
 port = os.environ["PORT"]
+authentication_api = "https://authenticationmicroservice.azurewebsites.net/authenticate"
 connection_string = "mongodb+srv://user:user@cluster0.hbniblw.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(connection_string)
 db = client["userdata"]
@@ -70,7 +71,7 @@ app = FastAPI()
 
 @app.get("/")
 def index():
-    return {"data": "Application ran successfully - checkout /#docs for more info!!"}
+    return {"data": "Application ran successfully -version 0.0.1"}
 
 
 @app.post("/mongo")
@@ -85,7 +86,10 @@ async def put(user: str):
 
 @app.post("/erase")
 async def erase(deleteactivity: Delete):
-    return authentificate(deleteactivity.token)
+    # send request to authentication microservice,where params is jwt token...in this case, deleteactivity
+    authenticated = requests.post(authentication_api, params=deleteactivity)
+    if authenticated.status_code == 200:
+        return {"authentication": "SUCCES"}
 
 
 def return_elevation(locations: List[Location]):
@@ -94,22 +98,6 @@ def return_elevation(locations: List[Location]):
     for lo in locations:
         elevations.append(elevation_data.get_elevation(lo.latitude, lo.longitude))
     return elevations
-
-
-def authentificate(token: str):
-    try:
-        idinfo = id_token.verify_oauth2_token(token, requests.Request(),
-                                              "168397874560-5uso2lk8p5pa43h3sb3eg9futfisese0.apps.googleusercontent.com")
-        expiration_time = datetime.fromtimestamp(idinfo['exp'], timezone.utc)
-        if datetime.now(timezone.utc) >= expiration_time:
-            return Authenticated(email="token expired", error=True)
-        return Authenticated(email=idinfo["email"], error=False)
-    except jwt.exceptions.InvalidSignatureError:
-        return Authenticated(email="Invalid_token_error", error=True)
-    except jwt.exceptions.DecodeError:
-        return Authenticated(email="Decode_error", error=True)
-    except jwt.exceptions.InvalidTokenError:
-        return Authenticated(email="Invalid_token_error", error=True)
 
 
 if __name__ == "__main__":
