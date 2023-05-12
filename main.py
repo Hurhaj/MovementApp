@@ -70,7 +70,7 @@ app = FastAPI()
 
 @app.get("/")
 def index():
-    return {"data": "Application ran successfully - FastAPI V5! checkout apis: /hello /hens /another"}
+    return {"data": "Application ran successfully - checkout /#docs for more info!!"}
 
 
 @app.post("/mongo")
