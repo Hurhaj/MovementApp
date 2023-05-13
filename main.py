@@ -121,10 +121,10 @@ async def synccheck(syncc: List[Elevationcheck], token:str):
 @app.post("/delete")
 async def delete(deleteid: str, token: str):
     auth = authenticate(token)
-    if(auth == "error"):
+    if auth == "error":
         return "token invalid"
     else:
-        if(authorize(auth, deleteid)):
+        if authorize(auth, deleteid):
             payload = {"deleteid": deleteid}
             ans = await req.post(Database_api+"delete", data=payload)
             return ans
@@ -132,13 +132,13 @@ async def delete(deleteid: str, token: str):
             return "not Authorized"
 async def authenticate(token: str):
     payload = {"token": token}
-    authenticated = await req.post(authentication_api, params=payload)
-    if(authenticated.error):
+    authenticated: Authenticated = await req.post(authentication_api, params=payload)
+    if authenticated.error:
         return "error"
     else:
         return authenticated.email
 def authorize(user: str, IDactivity: str):
-    if(user == IDactivity):
+    if user == IDactivity:
         return True
     else:
         return False
