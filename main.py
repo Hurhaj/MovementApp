@@ -7,7 +7,12 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from pymongo import MongoClient
 
-
+class Elevationdata(BaseModel):
+    ID: str
+    elevation: List[float]
+class Elevationcheck(BaseModel):
+    ID: str
+    elevationversion: bool
 class Location(BaseModel):
     latitude: float
     longitude: float
@@ -57,6 +62,7 @@ class NewActitivityReceive(BaseModel):
 # load environment variables
 # port = os.environ["PORT"]
 authentication_api = "https://authenticationmicroservice.azurewebsites.net/authenticate"
+Database_api = "database microservice URL"
 connection_string = "mongodb+srv://user:user@cluster0.hbniblw.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(connection_string)
 db = client["userdata"]
@@ -69,36 +75,77 @@ app = FastAPI()
 def index():
     return {"data": "Application ran successfully -version 0.0.5"}
 
-
-@app.post("/mongo")
-async def put(user: str):
-    doc = {"user": user}
-    try:
-        news = db["users"].insert_one(doc)
-        return "done"
-    except Exception as e:
-        return e + "error"
-
-
-@app.post("/erase")
-async def erase(deleteactivity: Delete):
-    # send request to authentication microservice,where params is jwt token...in this case, deleteactivity
-    payload = {"token": deleteactivity.token}
-
-    authenticated = req.post(authentication_api, params=payload)
-    if authenticated.status_code == 200:
-        return authenticated.json()
+@app.post("/syncreq")
+async def syncreq(sync: SynchronizationRequest,token:str):
+    auth = authenticate(token)
+    if (auth == "error"):
+        return "token invalid"
     else:
-        return authenticated.json()
-
-
-def return_elevation(locations: List[Location]):
-    elevation_data = srtm.get_data()
-    elevations = []
-    for lo in locations:
-        elevations.append(elevation_data.get_elevation(lo.latitude, lo.longitude))
-    return elevations
-
-
+        for id in sync.IDs:
+            if (authorize(auth, id)):
+                continue
+            else:
+                sync.remove(id)
+        if not sync:
+            return "not Authorized"
+        else:
+            ans = await req.post(Database_api + "syncreq", data=sync)
+            return ans
+@app.post("/newactivities")
+async def newactivities (newac: List[Activity], token:str):
+    auth = authenticate(token)
+    if (auth == "error"):
+        return "token invalid"
+    else:
+        for id in newac:
+            if (authorize(auth, id.ID)):
+                continue
+            else:
+                newac.remove(id.ID)
+        if not newac:
+            return "not Authorized"
+        else:
+            ans = await req.post(Database_api+"newactivities", data=newac)
+            return ans
+@app.post("/synccheck")
+async def synccheck(syncc: List[Elevationcheck], token:str):
+    auth = authenticate(token)
+    if(auth == "error"):
+        return "token invalid"
+    else:
+        for id in syncc:
+            if (authorize(auth, id.ID)):
+                continue
+            else:
+                syncc.remove(id.ID)
+        if not syncc:
+            return "not Authorized"
+        else:
+            ans = await req.post(Database_api+"synccheck", data=syncc)
+            return ans
+@app.post("/delete")
+async def delete(deleteid: str, token: str):
+    auth = authenticate(token)
+    if(auth == "error"):
+        return "token invalid"
+    else:
+        if(authorize(auth, deleteid)):
+            payload = {"deleteid": deleteid}
+            ans = await req.post(Database_api+"delete", data=payload)
+            return ans
+        else:
+            return "not Authorized"
+async def authenticate(token: str):
+    payload = {"token": token}
+    authenticated = await req.post(authentication_api, params=payload)
+    if(authenticated.error):
+        return "error"
+    else:
+        return authenticated.email
+def authorize(user: str, IDactivity: str):
+    if(user == IDactivity):
+        return True
+    else:
+        return False
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
