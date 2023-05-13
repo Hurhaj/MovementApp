@@ -45,11 +45,6 @@ class Activity(BaseModel):
     data: List[RoutePoints]
 
 
-class SynchronizationRequest(BaseModel):
-    token: str
-    IDs: List[str]
-
-
 class SynchronizationAnswer(BaseModel):
     activities: List[Activity]
     IDs: List[str]
@@ -62,7 +57,7 @@ class NewActitivityReceive(BaseModel):
 # load environment variables
 # port = os.environ["PORT"]
 authentication_api = "https://authenticationmicroservice.azurewebsites.net/authenticate"
-Database_api = "database microservice URL"
+Database_api = "https://mongorepositoryservice.azurewebsites.net/"
 connection_string = "mongodb+srv://user:user@cluster0.hbniblw.mongodb.net/?retryWrites=true&w=majority"
 client = MongoClient(connection_string)
 db = client["userdata"]
@@ -76,12 +71,12 @@ def index():
     return {"data": "Application ran successfully -version 0.0.5"}
 
 @app.post("/syncreq")
-async def syncreq(sync: SynchronizationRequest,token:str):
+async def syncreq(sync:List[str],token:str):
     auth = authenticate(token)
     if (auth == "error"):
         return "token invalid"
     else:
-        for id in sync.IDs:
+        for id in sync:
             if (authorize(auth, id)):
                 continue
             else:
