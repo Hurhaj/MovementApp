@@ -13,6 +13,7 @@ class Elevationdata(BaseModel):
     elevation: List[float]
 class Elevationcheck(BaseModel):
     ID: str
+    user: str
     elevationversion: bool
 class Location(BaseModel):
     latitude: float
@@ -46,7 +47,9 @@ class Activity(BaseModel):
     average_speed: int
     data: List[RoutePoints]
 
-
+class SynchronizationRequest(BaseModel):
+    ID: str
+    user: str
 class SynchronizationAnswer(BaseModel):
     activities: List[Activity]
     IDs: List[str]
@@ -73,61 +76,61 @@ def index():
     return {"data": "Application ran successfully -version 0.0.5"}
 
 @app.post("/syncreq")
-async def syncreq(sync:List[str],token:str):
-    auth = authenticate(token)
-    if (auth == "error"):
+async def syncreq(sync:List[SynchronizationRequest],token:str):
+    auth = await authenticate(token)
+    if auth == "error":
         return "token invalid"
     else:
         for id in sync:
-            if (authorize(auth, id)):
+            if authorize(auth, id.user):
                 continue
             else:
                 sync.remove(id)
         if not sync:
             return "not Authorized"
         else:
-            ans = await req.post(Database_api + "syncreq", data=sync)
+            ans = req.post(Database_api + "syncreq", data=sync)
             return ans
 @app.post("/newactivities")
 async def newactivities (newac: List[Activity], token:str):
-    auth = authenticate(token)
+    auth = await authenticate(token)
     if (auth == "error"):
         return "token invalid"
     else:
         for id in newac:
-            if (authorize(auth, id.ID)):
+            if authorize(auth, id.user):
                 continue
             else:
-                newac.remove(id.ID)
+                newac.remove(id)
         if not newac:
             return "not Authorized"
         else:
-            ans = await req.post(Database_api+"newactivities", data=newac)
+            ans = req.post(Database_api+"newactivities", data=newac)
             return ans
 @app.post("/synccheck")
 async def synccheck(syncc: List[Elevationcheck], token:str):
-    auth = authenticate(token)
+    auth = await authenticate(token)
     if(auth == "error"):
         return "token invalid"
     else:
         for id in syncc:
-            if (authorize(auth, id.ID)):
+            if authorize(auth, id.user):
                 continue
             else:
-                syncc.remove(id.ID)
+                syncc.remove(id)
         if not syncc:
             return "not Authorized"
         else:
-            ans = await req.post(Database_api+"synccheck", data=syncc)
+            ans = req.post(Database_api+"synccheck", data=syncc)
             return ans
 @app.post("/delete")
-async def delete(deleteid: str, token: str):
+async def delete(deleteid: str,user: str, token: str):
     auth = await authenticate(token)
     if auth == "error":
         return "token invalid"
     else:
-        if authorize(auth, deleteid):
-            payload = {"deleteid": deleteid}
+        if authorize(auth, user):
+            payload = {"deleteid": deleteid, "user": user}
             ans = req.post(Database_api+"delete", data=payload)
             return ans
         else:
