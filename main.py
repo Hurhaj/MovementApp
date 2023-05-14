@@ -37,6 +37,7 @@ class RoutePoints(BaseModel):
 
 class Activity(BaseModel):
     ID: str
+    user: str
     sport_type: str
     date: str
     distance: int
