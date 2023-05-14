@@ -1,3 +1,4 @@
+import json
 from typing import List
 
 import requests as req
@@ -120,26 +121,31 @@ async def synccheck(syncc: List[Elevationcheck], token:str):
             return ans
 @app.post("/delete")
 async def delete(deleteid: str, token: str):
-    auth = authenticate(token)
+    auth = await authenticate(token)
     if auth == "error":
         return "token invalid"
     else:
         if authorize(auth, deleteid):
             payload = {"deleteid": deleteid}
-            ans = await req.post(Database_api+"delete", data=payload)
+            ans = req.post(Database_api+"delete", data=payload)
             return ans
         else:
-            return "not Authorized"+auth
+            return "not Authorized"
 async def authenticate(token: str):
     payload = {"token": token}
     try:
-        authenticated: Authenticated = await req.post(authentication_api, params=payload)
+        ans = req.post(authentication_api, params=payload)
     except Exception as e:
-        return e
-    if authenticated.error:
+        print(e)
+    content = ans.text
+    try:
+        obj = json.loads(content)
+        if obj.error:
+            return "error"
+        else:
+            return obj.emailň
+    except Exception as e:
         return "error"
-    else:
-        return authenticated.email
 def authorize(user: str, IDactivity: str):
     if user == IDactivity:
         return True
