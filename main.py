@@ -46,10 +46,14 @@ class Activity(BaseModel):
     max_speed: int
     average_speed: int
     data: List[RoutePoints]
+    def to_dict(self):
+        return self.dict()
 
 class SynchronizationRequest(BaseModel):
     ID: str
     user: str
+    def to_dict(self):
+        return self.dict()
 class SynchronizationAnswer(BaseModel):
     activities: List[Activity]
     IDs: List[str]
@@ -73,7 +77,7 @@ app = FastAPI()
 
 @app.get("/")
 def index():
-    return {"data": "Application ran successfully -version 0.0.5"}
+    return {"data": "Application ran successfully -version 0.0.6"}
 
 @app.post("/syncreq")
 async def syncreq(sync:List[SynchronizationRequest],token:str):
@@ -89,12 +93,15 @@ async def syncreq(sync:List[SynchronizationRequest],token:str):
         if not sync:
             return "not Authorized"
         else:
-            ans = req.post(Database_api + "syncreq", data=sync)
-            return ans
+            my_json = json.dumps([obj.dict() for obj in sync])
+            print(my_json)
+            ans = req.post(Database_api + "syncreq", data=my_json)
+            return ans.content
 @app.post("/newactivities")
 async def newactivities (newac: List[Activity], token:str):
     auth = await authenticate(token)
-    if (auth == "error"):
+    print(auth)
+    if auth == "error":
         return "token invalid"
     else:
         for id in newac:
@@ -105,8 +112,9 @@ async def newactivities (newac: List[Activity], token:str):
         if not newac:
             return "not Authorized"
         else:
-            ans = req.post(Database_api+"newactivities", data=newac)
-            return ans
+            my_json = json.dumps([activity.dict() for activity in newac])
+            ans = req.post(Database_api+"newactivities", data=my_json)
+            return ans.content
 @app.post("/synccheck")
 async def synccheck(syncc: List[Elevationcheck], token:str):
     auth = await authenticate(token)
@@ -144,11 +152,12 @@ async def authenticate(token: str):
     content = ans.text
     try:
         obj = json.loads(content)
-        if obj.error:
+        if obj["error"]:
             return "error"
         else:
-            return obj.email
+            return obj["msg"]
     except Exception as e:
+        print(e)
         return "error"
 def authorize(user: str, IDactivity: str):
     if user == IDactivity:
