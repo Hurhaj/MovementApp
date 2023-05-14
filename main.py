@@ -147,7 +147,7 @@ async def authenticate(token: str):
         if obj.error:
             return "error"
         else:
-            return obj.emailň
+            return obj.email
     except Exception as e:
         return "error"
 def authorize(user: str, IDactivity: str):
