@@ -132,7 +132,10 @@ async def delete(deleteid: str, token: str):
             return "not Authorized"+auth
 async def authenticate(token: str):
     payload = {"token": token}
-    authenticated: Authenticated = await req.post(authentication_api, params=payload)
+    try:
+        authenticated: Authenticated = await req.post(authentication_api, params=payload)
+    except Exception as e:
+        return e
     if authenticated.error:
         return "error"
     else:
