@@ -79,7 +79,7 @@ app = FastAPI()
 
 @app.get("/")
 def index():
-    return {"data": "Application ran successfully -version 0.0.6"}
+    return {"data": "Application ran successfully -version 0.0.7"}
 
 @app.post("/syncreq")
 async def syncreq(sync:List[SynchronizationRequest],token:str):
@@ -98,7 +98,8 @@ async def syncreq(sync:List[SynchronizationRequest],token:str):
             my_json = json.dumps([obj.dict() for obj in sync])
             print(my_json)
             ans = req.post(Database_api + "syncreq", data=my_json)
-            return ans.content
+            json_data = ans.json()
+            return json_data
 @app.post("/newactivities")
 async def newactivities (newac: List[Activity], token:str):
     auth = await authenticate(token)
@@ -116,7 +117,8 @@ async def newactivities (newac: List[Activity], token:str):
         else:
             my_json = json.dumps([activity.dict() for activity in newac])
             ans = req.post(Database_api+"newactivities", data=my_json)
-            return ans.content
+            json_data = ans.json()
+            return json_data
 @app.post("/synccheck")
 async def synccheck(syncc: List[Elevationcheck], token:str):
     auth = await authenticate(token)
@@ -133,7 +135,8 @@ async def synccheck(syncc: List[Elevationcheck], token:str):
         else:
             my_json = json.dumps([activity.dict() for activity in syncc])
             ans = req.post(Database_api+"synccheck", data=my_json)
-            return ans.content
+            json_data = ans.json()
+            return json_data
 @app.post("/delete")
 async def delete(deleteid: str,user: str, token: str):
     auth = await authenticate(token)
@@ -143,7 +146,8 @@ async def delete(deleteid: str,user: str, token: str):
         if authorize(auth, user):
             payload = {"deleteid": deleteid, "user": user}
             ans = req.post(Database_api+"delete", data=payload)
-            return ans
+            json_data = ans.json()
+            return json_data
         else:
             return "not Authorized"
 async def authenticate(token: str):
