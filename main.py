@@ -15,6 +15,8 @@ class Elevationcheck(BaseModel):
     ID: str
     user: str
     elevationversion: bool
+    def to_dict(self):
+        return self.dict()
 class Location(BaseModel):
     latitude: float
     longitude: float
@@ -129,8 +131,9 @@ async def synccheck(syncc: List[Elevationcheck], token:str):
         if not syncc:
             return "not Authorized"
         else:
-            ans = req.post(Database_api+"synccheck", data=syncc)
-            return ans
+            my_json = json.dumps([activity.dict() for activity in syncc])
+            ans = req.post(Database_api+"synccheck", data=my_json)
+            return ans.content
 @app.post("/delete")
 async def delete(deleteid: str,user: str, token: str):
     auth = await authenticate(token)
