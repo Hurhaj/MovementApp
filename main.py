@@ -79,7 +79,7 @@ app = FastAPI()
 
 @app.get("/")
 def index():
-    return {"data": "Application ran successfully -version 0.0.8"}
+    return {"data": "Application ran successfully -version 0.0.9"}
 
 @app.post("/syncreq")
 async def syncreq(sync:List[SynchronizationRequest],token:str):
@@ -88,7 +88,8 @@ async def syncreq(sync:List[SynchronizationRequest],token:str):
         return "token invalid"
     else:
         if not sync:
-            my_json = {"ID":"none", "user":auth}
+            sync.append(SynchronizationRequest(ID="none",user=auth))
+            my_json = json.dumps([obj.dict() for obj in sync])
             ans = req.post(Database_api + "syncreq", data=my_json)
             json_data = ans.json()
             return json_data
